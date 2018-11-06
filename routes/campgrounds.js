@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Campground = require('../models/campground')
 
+
+//Index
 router.get("/", (req, res) => {
 
   Campground.find({}, function (err, campgrounds) {
@@ -13,7 +15,8 @@ router.get("/", (req, res) => {
   })
 })
 
-router.post("/", (req, res) => {
+//CREATE route
+router.post("/", isLoggedIn, (req, res) => {
   const name= req.body.name;
   const image=req.body.image;
   const desc = req.body.description;
@@ -27,11 +30,13 @@ router.post("/", (req, res) => {
   })
 })
 
-router.get("/new", (req, res) => {
+
+//NEW route
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new")
 })
 
-//Show -- show more info about one campground
+//SHOW -- show more info about one campground
 router.get("/:id", (req, res)=>{
   Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground) {
     if(err) {
@@ -43,5 +48,13 @@ router.get("/:id", (req, res)=>{
   });
   
 });
+
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    res.redirect("/login");
+  }
+}
 
 module.exports = router;

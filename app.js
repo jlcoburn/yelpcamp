@@ -19,6 +19,8 @@ const Comment   = require("./models/comment");
 const Campground = require('./models/campground');
 const User = require('./models/user');
 
+// const seedDB = require('./seeds')
+// seedDB();
 
 //Passport Configuration
 
