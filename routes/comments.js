@@ -44,13 +44,12 @@ router.post("/",isLoggedIn, (req, res) => {
 });
 
 // COMMENT EDIT ROUTE
-router.get("/:comments_id/edit", function (req, res) {
+router.get("/:comment_id/edit", checkCommentOwnership, function (req, res) {
   console.log("in edit route")
-   Comment.findById(req.params.comments_id, (err, foundComment) => {
+   Comment.findById(req.params.comment_id, (err, foundComment) => {
      if (err) {
        console.log(err)
      } else {
-      console.log(foundComment);
       res.render("comments/edit", {campground_id: req.params.id, comment: foundComment})
      }
   })
@@ -59,7 +58,7 @@ router.get("/:comments_id/edit", function (req, res) {
 
 
 //update campground route
-router.put("/:comment_id", (req, res)=> {
+router.put("/:comment_id", checkCommentOwnership, (req, res)=> {
   Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, (err, updatedComment) => {
     if (err) {
       res.render("error", {error: err});
@@ -69,7 +68,7 @@ router.put("/:comment_id", (req, res)=> {
 })
 });
 
-router.delete("/:comment_id",  (req,res)=> {
+router.delete("/:comment_id", checkCommentOwnership, (req,res)=> {
   Comment.findByIdAndRemove(req.params.comment_id, (err) =>{
     if (err) {
       res.render("error", {error: err})
@@ -89,24 +88,24 @@ function isLoggedIn(req, res, next) {
   }
 }
 
-// function checkCommentOwnership(req, res, next) {
-//   if (req.isAuthenticated()) {
-//     Comment.findById(req.params.id, (err, foundCampground) =>{
-//       if (err) {
-//         res.redirect("back")
-//       } else {
-//         if (foundCampground.author.id.equals(req.user.id)) {
-//          next();
-//         } else {
-//           res.redirect("back");
-//         }
-//       }
-//     });
+function checkCommentOwnership(req, res, next) {
+  if (req.isAuthenticated()) {
+    Comment.findById(req.params.comment_id, (err, foundComment) =>{
+      if (err) {
+        res.redirect("back")
+      } else {
+        if (foundComment.author.id.equals(req.user._id)) {
+         next();
+        } else {
+          res.redirect("back");
+        }
+      }
+    });
 
-//   } else {
-//     res.redirect("back");
-//   }
-// }
+  } else {
+    res.redirect("back");
+  }
+}
 
 
 
